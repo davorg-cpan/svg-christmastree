@@ -12,12 +12,12 @@ my $svg = SVG->new(
   height => 1_000,
 );
 
-triangle($svg, 45);
+triangle($svg, 90, 100);
 
 say $svg->xmlify;
 
 sub triangle {
-  my ($svg, $top_angle, $base) = @_;
+  my ($svg, $top_angle, $base, $top) = @_;
 
   my ($x, $y);
 
@@ -36,12 +36,14 @@ sub triangle {
   } else {
   }
 
+  warn "Hyp: ", sqrt((500**2) + ($height**2)), "\n";
+
   if ($height > 1_000) {
     $base = $base * (1_000 / $height);
     $height = 1_000;
   }
 
-  $x = [ 0, $base / 2, $base]; 
+  $x = [ 0, $base / 2, $base];
   $y = [ $height, 0, $height];
 
   my $path = $svg->get_path(
