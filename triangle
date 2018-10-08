@@ -1,0 +1,63 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use feature 'say';
+
+use SVG;
+use Math::Trig qw[deg2rad tan];
+
+my $svg = SVG->new(
+  width =>  1_000,
+  height => 1_000,
+);
+
+triangle($svg, 45);
+
+say $svg->xmlify;
+
+sub triangle {
+  my ($svg, $top_angle, $base) = @_;
+
+  my ($x, $y);
+
+  $base //= 1_000;
+  $base = 1_000 if $base > 1_000;
+
+  my $height = $base;
+
+  if ($top_angle) {
+    warn "$top_angle degrees\n";
+    warn deg2rad($top_angle), " radians\n";
+    $top_angle = deg2rad($top_angle) / 2;
+    warn "$top_angle\n";
+    warn "tan ", tan($top_angle), "\n";
+    $height = ($base / 2) / tan($top_angle);
+  } else {
+  }
+
+  if ($height > 1_000) {
+    $base = $base * (1_000 / $height);
+    $height = 1_000;
+  }
+
+  $x = [ 0, $base / 2, $base]; 
+  $y = [ $height, 0, $height];
+
+  my $path = $svg->get_path(
+    x => $x,
+    y => $y,
+    -type => 'polyline',
+    -closed => 1,
+  );
+
+  my $green = 'rgb(0,127,0)';
+
+  $svg->polyline(
+    %$path,
+    style => {
+      fill => $green,
+      stroke => $green,
+    },
+  );
+}	
