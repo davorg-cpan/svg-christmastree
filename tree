@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use feature 'say';
+
+use SVG;
+use Math::Trig qw[deg2rad tan];
+use Data::Dumper;
+
+my $svg = SVG->new(
+  width =>  1_000,
+  height => 1_000,
+);
+
+pot($svg);
+trunk($svg);
+triangle($svg, 90, 600, 700);
+triangle($svg, 90, 500, 500);
+triangle($svg, 90, 400, 350);
+triangle($svg, 90, 300, 225);
+
+# triangle($svg, 90, 100);
+
+say $svg->xmlify;
+
+sub coloured_shape {
+  my ($svg, $x, $y, $colour) = @_;
+
+  my $path = $svg->get_path(
+    x => $x,
+    y => $y,
+    -type => 'polyline',
+    -closed => 1,
+  );
+
+  $svg->polyline(
+    %$path,
+    style => {
+      fill => $colour,
+      stroke => $colour,
+    },
+  )
+}
+
+sub pot {
+  my ($svg) = @_;
+
+  coloured_shape(
+    $svg,
+    [  400, 350, 650,  600 ],
+    [ 1000, 800, 800, 1000 ],
+    'rgb(191,0,0)',
+  );
+}
+
+sub trunk {
+  my ($svg) = @_;
+
+  coloured_shape(
+    $svg,
+    [ 450, 450, 550, 550 ],
+    [ 800, 700, 700, 800 ],
+    'rgb(139,69,19)',
+  );
+}
+
+sub triangle {
+  my ($svg, $top_angle, $base, $bottom) = @_;
+
+  my ($x, $y);
+
+  my $height = $base;
+
+  if ($top_angle) {
+    warn "$top_angle degrees\n";
+    warn deg2rad($top_angle), " radians\n";
+    $top_angle = deg2rad($top_angle) / 2;
+    warn "$top_angle\n";
+    warn "tan ", tan($top_angle), "\n";
+    $height = ($base / 2) / tan($top_angle);
+  }
+
+  warn "Hyp: ", sqrt((500**2) + ($height**2)), "\n";
+
+  $x = [ 500 - ($base / 2), 500, 500 + ($base / 2) ];
+  $y = [ $bottom, $bottom - $height, $bottom ];
+
+warn Dumper $y;
+
+  coloured_shape(
+    $svg, $x, $y, 'rgb(0,127,0)'
+  );
+}
