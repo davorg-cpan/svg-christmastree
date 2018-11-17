@@ -15,12 +15,15 @@ my $svg = SVG->new(
 
 pot($svg);
 trunk($svg);
-triangle($svg, 90, 600, 700);
-triangle($svg, 90, 500, 500);
-triangle($svg, 90, 400, 350);
-triangle($svg, 90, 300, 225);
-
-# triangle($svg, 90, 100);
+my $width = 600;
+my $tri_bottom = 700;
+for (1 .. 4) {
+  my $h = triangle($svg, 90, $width, $tri_bottom);
+  bauble($svg, 500 - ($width/2), $tri_bottom);
+  bauble($svg, 500 + ($width/2), $tri_bottom);
+  $width *= 5/6;
+  $tri_bottom -= ($h * .5)
+}
 
 say $svg->xmlify;
 
@@ -86,9 +89,25 @@ sub triangle {
   $x = [ 500 - ($base / 2), 500, 500 + ($base / 2) ];
   $y = [ $bottom, $bottom - $height, $bottom ];
 
-warn Dumper $y;
-
   coloured_shape(
     $svg, $x, $y, 'rgb(0,127,0)'
+  );
+
+  return $height;
+}
+
+sub bauble {
+  my ($svg, $x, $y) = @_;
+
+  my $gold = 'rgb(212,175,55)';
+
+  $svg->circle(
+    cx => $x,
+    cy => $y + 20,
+    r => 20,
+    style => {
+      fill => $gold,
+      stroke => $gold,
+    },
   );
 }
