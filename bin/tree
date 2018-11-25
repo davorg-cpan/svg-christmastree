@@ -1,0 +1,11 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use feature 'say';
+
+use SVG::ChristmasTree;
+
+my $tree = SVG::ChristmasTree->new;
+
+say $tree->as_xml;
