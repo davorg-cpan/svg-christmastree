@@ -8,6 +8,16 @@ use namespace::autoclean;
 use SVG;
 use Math::Trig qw[deg2rad tan];
 
+# Constants that we haven't made into attributes yet
+use constant {
+  TREE_WIDTH => 600,
+  TOP_ANGLE  => 90,
+  POT_TOP_WIDTH => 300,
+  POT_BOT_WIDTH => 200,
+  TRUNK_WIDTH => 100,
+  BAUBLE_RADIUS => 20,
+};
+
 has width => (
   isa => 'Int',
   is  => 'ro',
@@ -41,6 +51,12 @@ has layers => (
   default => 4,
 );
 
+has trunk_length => (
+  isa => 'Int',
+  is  => 'ro',
+  default => 100,
+);
+
 has leaf_colour => (
   isa => 'Str',
   is  => 'ro',
@@ -65,17 +81,23 @@ has pot_colour => (
   default => 'rgb(191,0,0)',
 );
 
+has pot_height => (
+  isa => 'Int',
+  is  => 'ro',
+  default => 200,
+);
+
 sub as_xml {
   my $self = shift;
 
   $self->pot;
   $self->trunk;
-  my $width = 600;
-  my $tri_bottom = 700;
+  my $width = TREE_WIDTH;
+  my $tri_bottom = $self->height - $self->pot_height - $self->trunk_length;
   for (1 .. $self->layers) {
-    my $h = $self->triangle(90, $width, $tri_bottom);
-    $self->bauble(500 - ($width/2), $tri_bottom);
-    $self->bauble(500 + ($width/2), $tri_bottom);
+    my $h = $self->triangle(TOP_ANGLE, $width, $tri_bottom);
+    $self->bauble($self->mid_y - ($width/2), $tri_bottom);
+    $self->bauble($self->mid_y + ($width/2), $tri_bottom);
     $width *= 5/6;
     $tri_bottom -= ($h * .5)
   }
@@ -85,9 +107,15 @@ sub as_xml {
 
 sub pot {
   my $self = shift;
+
+  my $pot_top = $self->height - $self->pot_height;
+
   $self->coloured_shape(
-    [  400, 350, 650,  600 ],
-    [ 1000, 800, 800, 1000 ],
+    [  $self->mid_y - (POT_BOT_WIDTH / 2),
+       $self->mid_y - (POT_TOP_WIDTH / 2),
+       $self->mid_y + (POT_TOP_WIDTH / 2),
+       $self->mid_y + (POT_BOT_WIDTH / 2) ],
+    [ $self->height, $pot_top, $pot_top, $self->height ],
     $self->pot_colour,
   );
 }
@@ -95,9 +123,13 @@ sub pot {
 sub trunk {
   my $self = shift;
 
+  my $trunk_bottom = $self->height - $self->pot_height;
+  my $trunk_top    = $trunk_bottom - $self->trunk_length;
+
   $self->coloured_shape(
-    [ 450, 450, 550, 550 ],
-    [ 800, 700, 700, 800 ],
+    [ $self->mid_y - (TRUNK_WIDTH / 2), $self->mid_y - (TRUNK_WIDTH / 2),
+      $self->mid_y + (TRUNK_WIDTH / 2), $self->mid_y + (TRUNK_WIDTH / 2) ],
+    [ $trunk_bottom, $trunk_top, $trunk_top, $trunk_bottom ],
     $self->trunk_colour,
   );
 }
@@ -108,14 +140,12 @@ sub triangle {
 
   my ($x, $y);
 
-  my $height = $base;
+  # Assume $top_angle is in degrees
+  $top_angle = deg2rad($top_angle) / 2;
+  # If I remember my trig correctlt...
+  my $height = ($base / 2) / tan($top_angle);
 
-  if ($top_angle) {
-    $top_angle = deg2rad($top_angle) / 2;
-    $height = ($base / 2) / tan($top_angle);
-  }
-
-  $x = [ 500 - ($base / 2), 500, 500 + ($base / 2) ];
+  $x = [ $self->mid_y - ($base / 2), $self->mid_y, $self->mid_y + ($base / 2) ];
   $y = [ $bottom, $bottom - $height, $bottom ];
 
   $self->coloured_shape(
@@ -131,13 +161,19 @@ sub bauble {
 
   $self->svg->circle(
     cx => $x,
-    cy => $y + 20,
-    r => 20,
+    cy => $y + BAUBLE_RADIUS,
+    r => BAUBLE_RADIUS,
     style => {
       fill => $self->bauble_colour,
       stroke => $self->bauble_colour,
     },
   );
+}
+
+sub mid_y {
+  my $self = shift;
+
+  return $self->width / 2;
 }
 
 sub coloured_shape {
@@ -157,7 +193,7 @@ sub coloured_shape {
       fill => $colour,
       stroke => $colour,
     },
-  )
+  );
 }
 
 1;
