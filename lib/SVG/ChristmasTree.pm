@@ -1,3 +1,19 @@
+=head1 NAME
+
+SVG::ChristmasTree
+
+=head1 DESCRIPTION
+
+Perl extension to draw Christmas trees with SVG
+
+=head1 SYNOPSIS
+
+    # Default tree
+    my $tree = SVG::ChristmasTree->new;
+    print $tree->as_xml;
+
+=cut
+
 package SVG::ChristmasTree;
 
 use strict;
@@ -10,12 +26,14 @@ use Math::Trig qw[deg2rad tan];
 
 # Constants that we haven't made into attributes yet
 use constant {
-  TREE_WIDTH => 600,
-  TOP_ANGLE  => 90,
-  POT_TOP_WIDTH => 300,
-  POT_BOT_WIDTH => 200,
-  TRUNK_WIDTH => 100,
-  BAUBLE_RADIUS => 20,
+  TREE_WIDTH => 600,          # Width of the bottom tree layer
+  TOP_ANGLE  => 90,           # Angle at the top of the tree triangles
+  LAYER_SIZE_RATIO => (5/6),  # How much smaller each layer gets
+  LAYER_STACKING => 0.5,      # How far up a layer triangle does the next one start
+  POT_TOP_WIDTH => 300,       # Width of the top of the pot
+  POT_BOT_WIDTH => 200,       # Width of the bottom of the pot
+  TRUNK_WIDTH => 100,         # Width of the trunk
+  BAUBLE_RADIUS => 20,        # Radius of a bauble
 };
 
 has width => (
@@ -98,8 +116,8 @@ sub as_xml {
     my $h = $self->triangle(TOP_ANGLE, $width, $tri_bottom);
     $self->bauble($self->mid_y - ($width/2), $tri_bottom);
     $self->bauble($self->mid_y + ($width/2), $tri_bottom);
-    $width *= 5/6;
-    $tri_bottom -= ($h * .5)
+    $width *= LAYER_SIZE_RATIO;
+    $tri_bottom -= ($h * LAYER_STACKING);
   }
 
   return $self->svg->xmlify;
