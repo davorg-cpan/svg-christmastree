@@ -6,6 +6,6 @@ use feature 'say';
 
 use SVG::ChristmasTree;
 
-my $tree = SVG::ChristmasTree->new;
+my $tree = SVG::ChristmasTree->new_with_options;
 
 say $tree->as_xml;

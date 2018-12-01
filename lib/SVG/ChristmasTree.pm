@@ -12,6 +12,14 @@ Perl extension to draw Christmas trees with SVG
     my $tree = SVG::ChristmasTree->new;
     print $tree->as_xml;
 
+    # Or change things
+    my tree = SVG::ChristmasTree->new({
+      layers => 5,
+      leaf_colour => 'rgb(0,255,0)',
+      pot_colour => 'rgb(0,0,255)',
+    });
+    print $tree->as_xml;
+
 =cut
 
 package SVG::ChristmasTree;
@@ -24,6 +32,8 @@ use namespace::autoclean;
 use SVG;
 use Math::Trig qw[deg2rad tan];
 use POSIX 'round';
+
+with 'MooseX::Getopt';
 
 # Constants that we haven't made into attributes yet
 use constant {
@@ -48,6 +58,7 @@ has height => (
   isa => 'Int',
   is  => 'ro',
   lazy_build => 1,
+  init_arg => undef,
 );
 
 # Height is calculated from all the other stuff
@@ -75,6 +86,7 @@ has triangle_heights => (
   isa => 'ArrayRef',
   is => 'ro',
   lazy_build => 1,
+  init_arg => undef,
 );
 
 sub _build_triangle_heights {
@@ -83,14 +95,14 @@ sub _build_triangle_heights {
   my @heights;
   my $width = TREE_WIDTH;
   for (1 .. $self->layers) {
-    push @heights, $self->triangle_height($width, TOP_ANGLE);
+    push @heights, $self->_triangle_height($width, TOP_ANGLE);
     $width *= LAYER_SIZE_RATIO;
   }
 
   return \@heights;
 }
 
-sub triangle_height {
+sub _triangle_height {
   my $self = shift;
   my ($base, $top_angle) = @_;
 
@@ -104,6 +116,7 @@ has svg => (
   isa  => 'SVG',
   is   => 'ro',
   lazy_build => 1,
+  init_arg => undef,
 );
 
 sub _build_svg {
@@ -161,6 +174,7 @@ has triangles => (
   isa => 'ArrayRef',
   is => 'ro',
   lazy_build => 1,
+  init_arg => undef,
 );
 
 sub _build_triangles {
@@ -171,7 +185,7 @@ sub _build_triangles {
 
   my @triangles;
   for (1 .. $self->layers) {
-    push @triangles, $self->triangle(TOP_ANGLE, $width, $tri_bottom);
+    push @triangles, $self->_triangle(TOP_ANGLE, $width, $tri_bottom);
     $width *= LAYER_SIZE_RATIO;
     $tri_bottom -= $triangles[-1]->{h} * LAYER_STACKING;
   }
@@ -187,8 +201,8 @@ sub as_xml {
 
   for (@{$self->triangles}) {
     my $h = $self->triangle(TOP_ANGLE, $_->{w}, $_->{b});
-    $self->bauble($self->mid_y - ($_->{w}/2), $_->{b});
-    $self->bauble($self->mid_y + ($_->{w}/2), $_->{b});
+    $self->bauble($self->_mid_y - ($_->{w}/2), $_->{b});
+    $self->bauble($self->_mid_y + ($_->{w}/2), $_->{b});
     $self->coloured_shape(
       $_->{x}, $_->{y}, $self->leaf_colour,
     );
@@ -203,10 +217,10 @@ sub pot {
   my $pot_top = $self->height - $self->pot_height;
 
   $self->coloured_shape(
-    [  $self->mid_y - (POT_BOT_WIDTH / 2),
-       $self->mid_y - (POT_TOP_WIDTH / 2),
-       $self->mid_y + (POT_TOP_WIDTH / 2),
-       $self->mid_y + (POT_BOT_WIDTH / 2) ],
+    [  $self->_mid_y - (POT_BOT_WIDTH / 2),
+       $self->_mid_y - (POT_TOP_WIDTH / 2),
+       $self->_mid_y + (POT_TOP_WIDTH / 2),
+       $self->_mid_y + (POT_BOT_WIDTH / 2) ],
     [ $self->height, $pot_top, $pot_top, $self->height ],
     $self->pot_colour,
   );
@@ -219,14 +233,14 @@ sub trunk {
   my $trunk_top    = $trunk_bottom - $self->trunk_length;
 
   $self->coloured_shape(
-    [ $self->mid_y - (TRUNK_WIDTH / 2), $self->mid_y - (TRUNK_WIDTH / 2),
-      $self->mid_y + (TRUNK_WIDTH / 2), $self->mid_y + (TRUNK_WIDTH / 2) ],
+    [ $self->_mid_y - (TRUNK_WIDTH / 2), $self->_mid_y - (TRUNK_WIDTH / 2),
+      $self->_mid_y + (TRUNK_WIDTH / 2), $self->_mid_y + (TRUNK_WIDTH / 2) ],
     [ $trunk_bottom, $trunk_top, $trunk_top, $trunk_bottom ],
     $self->trunk_colour,
   );
 }
 
-sub triangle {
+sub _triangle {
   my $self = shift;
   my ($top_angle, $base, $bottom) = @_;
 
@@ -237,7 +251,7 @@ sub triangle {
   # If I remember my trig correctly...
   my $height = ($base / 2) / tan($top_angle);
 
-  $x = [ $self->mid_y - ($base / 2), $self->mid_y, $self->mid_y + ($base / 2) ];
+  $x = [ $self->_mid_y - ($base / 2), $self->_mid_y, $self->_mid_y + ($base / 2) ];
   $y = [ $bottom, $bottom - $height, $bottom ];
 
   return {
@@ -264,13 +278,13 @@ sub bauble {
   );
 }
 
-sub mid_y {
+sub _mid_y {
   my $self = shift;
 
   return $self->width / 2;
 }
 
-sub coloured_shape {
+sub _coloured_shape {
   my $self = shift;
   my ($x, $y, $colour) = @_;
 
