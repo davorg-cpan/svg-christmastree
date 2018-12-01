@@ -48,6 +48,61 @@ use constant {
   STAR_RADIUS => 40,          # Raduis of the star
 };
 
+=head1 Methods
+
+=head2 $tree = SVG::ChristmasTree->new(\%args)
+
+Constructs and returns a new SVG::ChristmasTree object. With no arguments,
+a default tree design is created, but it is possible to change that by
+passing the following attributes to the method.
+
+=over 4
+
+=item width INT
+
+The width of the tree diagram in "pixels". The default is 1,000.
+
+=item layers INT
+
+The number of layers in the tree. The default tree has four layers.
+
+=item trunk_length INT
+
+The length of the trunk in "pixels". The default length is 100.
+
+=item leaf_colour STR
+
+The colour of the tree's leaves. This must be defined as an SVG RGB value.
+The default value is "rgb(0,127,0)".
+
+=item bauble_colour STR
+
+The colour of the baubles that hang on the tree. This must be defined as an
+SVG RGB value. The default value is "rgb(212,175,55)".
+
+=item trunk colour STR
+
+The colour of the tree trunk. This must be defined as an SVG RGB value. The
+default value is "rgb(139,69,19)".
+
+=item pot_colour STR
+
+The colour of the pot. This must be defined as an SVG RGB value. The default
+value is "rgb(191,0,0)".
+
+=item pot_height INT
+
+The height of the pot in "pixels". The default height is 200.
+
+=back
+
+=head2 $tree->as_xml
+
+Returns the SVG document as XML. You will usually want to store the returned
+value in a variable, print it to C<STDOUT> or write it to a file.
+
+=cut
+
 has width => (
   isa => 'Int',
   is  => 'ro',
