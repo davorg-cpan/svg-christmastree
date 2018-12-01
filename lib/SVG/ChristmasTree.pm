@@ -23,6 +23,7 @@ use Moose;
 use namespace::autoclean;
 use SVG;
 use Math::Trig qw[deg2rad tan];
+use POSIX 'round';
 
 # Constants that we haven't made into attributes yet
 use constant {
@@ -34,6 +35,7 @@ use constant {
   POT_BOT_WIDTH => 200,       # Width of the bottom of the pot
   TRUNK_WIDTH => 100,         # Width of the trunk
   BAUBLE_RADIUS => 20,        # Radius of a bauble
+  STAR_RADIUS => 40,          # Raduis of the star
 };
 
 has width => (
@@ -45,8 +47,58 @@ has width => (
 has height => (
   isa => 'Int',
   is  => 'ro',
-  default => 1_000,
+  lazy_build => 1,
 );
+
+# Height is calculated from all the other stuff
+sub _build_height {
+  my $self = shift;
+
+  # Pot height ...
+  my $height = $self->pot_height;
+  # ... plus the trunk length ...
+  $height += $self->trunk_length;
+  # ... for most of the layers ...
+  for (0 .. $self->layers - 2) {
+    # ... add LAYER_STACKING of the height ...
+    $height += $self->triangle_heights->[$_] * LAYER_STACKING;
+  }
+  # ... add all of the last layer ...
+  $height += $self->triangle_heights->[-1];
+  # ... and (finally) half of the star
+  $height += STAR_RADIUS / 2;
+
+  return round $height;
+}
+
+has triangle_heights => (
+  isa => 'ArrayRef',
+  is => 'ro',
+  lazy_build => 1,
+);
+
+sub _build_triangle_heights {
+  my $self = shift;
+
+  my @heights;
+  my $width = TREE_WIDTH;
+  for (1 .. $self->layers) {
+    push @heights, $self->triangle_height($width, TOP_ANGLE);
+    $width *= LAYER_SIZE_RATIO;
+  }
+
+  return \@heights;
+}
+
+sub triangle_height {
+  my $self = shift;
+  my ($base, $top_angle) = @_;
+
+  # Assume $top_angle is in degrees
+  $top_angle = deg2rad($top_angle) / 2;
+  # If I remember my trig correctly...
+  return ($base / 2) / tan($top_angle);
+}
 
 has svg => (
   isa  => 'SVG',
@@ -105,19 +157,41 @@ has pot_height => (
   default => 200,
 );
 
+has triangles => (
+  isa => 'ArrayRef',
+  is => 'ro',
+  lazy_build => 1,
+);
+
+sub _build_triangles {
+  my $self = shift;
+
+  my $width = TREE_WIDTH;
+  my $tri_bottom = $self->height - $self->pot_height - $self->trunk_length;
+
+  my @triangles;
+  for (1 .. $self->layers) {
+    push @triangles, $self->triangle(TOP_ANGLE, $width, $tri_bottom);
+    $width *= LAYER_SIZE_RATIO;
+    $tri_bottom -= $triangles[-1]->{h} * LAYER_STACKING;
+  }
+
+  return \@triangles;
+}
+
 sub as_xml {
   my $self = shift;
 
   $self->pot;
   $self->trunk;
-  my $width = TREE_WIDTH;
-  my $tri_bottom = $self->height - $self->pot_height - $self->trunk_length;
-  for (1 .. $self->layers) {
-    my $h = $self->triangle(TOP_ANGLE, $width, $tri_bottom);
-    $self->bauble($self->mid_y - ($width/2), $tri_bottom);
-    $self->bauble($self->mid_y + ($width/2), $tri_bottom);
-    $width *= LAYER_SIZE_RATIO;
-    $tri_bottom -= ($h * LAYER_STACKING);
+
+  for (@{$self->triangles}) {
+    my $h = $self->triangle(TOP_ANGLE, $_->{w}, $_->{b});
+    $self->bauble($self->mid_y - ($_->{w}/2), $_->{b});
+    $self->bauble($self->mid_y + ($_->{w}/2), $_->{b});
+    $self->coloured_shape(
+      $_->{x}, $_->{y}, $self->leaf_colour,
+    );
   }
 
   return $self->svg->xmlify;
@@ -160,17 +234,19 @@ sub triangle {
 
   # Assume $top_angle is in degrees
   $top_angle = deg2rad($top_angle) / 2;
-  # If I remember my trig correctlt...
+  # If I remember my trig correctly...
   my $height = ($base / 2) / tan($top_angle);
 
   $x = [ $self->mid_y - ($base / 2), $self->mid_y, $self->mid_y + ($base / 2) ];
   $y = [ $bottom, $bottom - $height, $bottom ];
 
-  $self->coloured_shape(
-    $x, $y, $self->leaf_colour,
-  );
-
-  return $height;
+  return {
+    x => $x,      # array ref of x points
+    y => $y,      # array ref of y points
+    h => $height, # height of the triangle
+    w => $base,   # length of the base of the triangle
+    b => $bottom, # y-coord of the bottom of the triangle
+  };
 }
 
 sub bauble {
