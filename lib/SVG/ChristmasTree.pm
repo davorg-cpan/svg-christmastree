@@ -35,6 +35,8 @@ use POSIX 'round';
 
 with 'MooseX::Getopt';
 
+our $VERSION = '0.0.1';
+
 # Constants that we haven't made into attributes yet
 use constant {
   TREE_WIDTH => 600,          # Width of the bottom tree layer
@@ -255,10 +257,10 @@ sub as_xml {
   $self->trunk;
 
   for (@{$self->triangles}) {
-    my $h = $self->triangle(TOP_ANGLE, $_->{w}, $_->{b});
+    my $h = $self->_triangle(TOP_ANGLE, $_->{w}, $_->{b});
     $self->bauble($self->_mid_y - ($_->{w}/2), $_->{b});
     $self->bauble($self->_mid_y + ($_->{w}/2), $_->{b});
-    $self->coloured_shape(
+    $self->_coloured_shape(
       $_->{x}, $_->{y}, $self->leaf_colour,
     );
   }
@@ -271,7 +273,7 @@ sub pot {
 
   my $pot_top = $self->height - $self->pot_height;
 
-  $self->coloured_shape(
+  $self->_coloured_shape(
     [  $self->_mid_y - (POT_BOT_WIDTH / 2),
        $self->_mid_y - (POT_TOP_WIDTH / 2),
        $self->_mid_y + (POT_TOP_WIDTH / 2),
@@ -287,7 +289,7 @@ sub trunk {
   my $trunk_bottom = $self->height - $self->pot_height;
   my $trunk_top    = $trunk_bottom - $self->trunk_length;
 
-  $self->coloured_shape(
+  $self->_coloured_shape(
     [ $self->_mid_y - (TRUNK_WIDTH / 2), $self->_mid_y - (TRUNK_WIDTH / 2),
       $self->_mid_y + (TRUNK_WIDTH / 2), $self->_mid_y + (TRUNK_WIDTH / 2) ],
     [ $trunk_bottom, $trunk_top, $trunk_top, $trunk_bottom ],
@@ -358,5 +360,18 @@ sub _coloured_shape {
     },
   );
 }
+
+=head1 AUTHOR
+
+Dave Cross <dave@perlhacks.com>
+
+=head1 COPYRIGHT AND LICENCE
+
+Copyright (c) 2018, Magnum Solutions Ltd. All Rights Reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=cut
 
 1;

@@ -1,1 +1,9 @@
 *.svg
+MANIFEST.bak
+MYMETA.json
+MYMETA.yml
+Makefile
+SVG-ChristmasTree-*.tar.gz
+blib/
+pm_to_blib
+
