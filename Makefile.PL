@@ -24,6 +24,7 @@ WriteMakefile(
     'Math::Trig' => 0,
     'namespace::autoclean' => 0,
   },
+  clean => { FILES => 'SVG-ChristmasTree-*' },
   META_MERGE => {
     'meta-spec' => { version => 2 },
     resources => {
