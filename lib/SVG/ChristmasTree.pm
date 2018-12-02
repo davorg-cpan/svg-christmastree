@@ -31,7 +31,6 @@ use Moose;
 use namespace::autoclean;
 use SVG;
 use Math::Trig qw[deg2rad tan];
-use POSIX 'round';
 
 with 'MooseX::Getopt';
 
@@ -136,7 +135,7 @@ sub _build_height {
   # ... and (finally) half of the star
   $height += STAR_RADIUS / 2;
 
-  return round $height;
+  return int($height + 0.5);
 }
 
 has triangle_heights => (
