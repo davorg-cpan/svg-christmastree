@@ -1,6 +1,6 @@
 =head1 NAME
 
-SVG::ChristmasTree
+SVG::ChristmasTree - Perl extension to draw Christmas trees with SVG
 
 =head1 DESCRIPTION
 
