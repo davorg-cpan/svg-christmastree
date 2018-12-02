@@ -2,6 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME => 'SVG::ChristmasTree',
+  AUTHOR => q{Dave Cross <dave@perlhacks.com>},
   VERSION_FROM => 'lib/SVG/ChristmasTree.pm',
   LICENSE      => 'perl_5',
   MIN_PERL_VERSION => '5.10.0',
