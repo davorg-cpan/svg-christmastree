@@ -4,6 +4,4 @@ lib/SVG/ChristmasTree.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-MYMETA.json
-MYMETA.yml
 t/basic.t
