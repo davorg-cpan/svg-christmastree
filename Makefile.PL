@@ -11,6 +11,7 @@ WriteMakefile(
     'ExtUtils::MakeMaker' => 0,
     SVG => 0,
     Moose => 0,
+    'MooseX::Getopt' => 0,
     POSIX => 0,
     'Math::Trig' => 0,
     'namespace::autoclean' => 0,
@@ -18,6 +19,7 @@ WriteMakefile(
   PREREQ_PM => {
     SVG => 0,
     Moose => 0,
+    'MooseX::Getopt' => 0,
     POSIX => 0,
     'Math::Trig' => 0,
     'namespace::autoclean' => 0,
