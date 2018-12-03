@@ -360,6 +360,8 @@ sub _coloured_shape {
   );
 }
 
+__PACKAGE__->meta()->make_immutable();
+
 =head1 AUTHOR
 
 Dave Cross <dave@perlhacks.com>
