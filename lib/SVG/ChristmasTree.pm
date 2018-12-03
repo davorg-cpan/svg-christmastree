@@ -13,7 +13,7 @@ Perl extension to draw Christmas trees with SVG
     print $tree->as_xml;
 
     # Or change things
-    my tree = SVG::ChristmasTree->new({
+    my $tree = SVG::ChristmasTree->new({
       layers => 5,
       leaf_colour => 'rgb(0,255,0)',
       pot_colour => 'rgb(0,0,255)',
