@@ -5,3 +5,5 @@ SVG-ChristmasTree-*
 .gitignore
 .*\.bak
 Makefile$
+MYMETA\.*
+.travis.yml

@@ -4,4 +4,5 @@ lib/SVG/ChristmasTree.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
+README.md
 t/basic.t
