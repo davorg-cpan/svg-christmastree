@@ -34,7 +34,7 @@ use Math::Trig qw[deg2rad tan];
 
 with 'MooseX::Getopt';
 
-our $VERSION = '0.0.3';
+our $VERSION = '0.0.4';
 
 # Constants that we haven't made into attributes yet
 use constant {
