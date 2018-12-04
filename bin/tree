@@ -33,9 +33,6 @@ Draw a different Christmas tree.
     usage: tree [-?h] [long options...]
         -h -? --usage --help        Prints this usage information.
         --width INT
-        --height INT
-        --triangle_heights STR...
-        --svg
         --layers INT
         --trunk_length INT
         --leaf_colour STR
@@ -43,5 +40,4 @@ Draw a different Christmas tree.
         --trunk_colour STR
         --pot_colour STR
         --pot_height INT
-        --triangles STR...
 =cut
